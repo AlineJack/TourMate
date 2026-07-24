@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dashboard — TourMate</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%2314313A'/%3E%3Cpath d='M15.5 8.5L13 13L8.5 15.5L11 11L15.5 8.5Z' fill='%23EFA23D'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&amp;family=Inter:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<header class="navbar">
+  <div class="container">
+    <a href="dashboard.html" class="brand">
+      <svg viewBox="0 0 24 24" class="brand-mark" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="12" r="10.2" fill="none" stroke="#14313A" stroke-width="1.6"/>
+        <path d="M15.5 8.5L13 13L8.5 15.5L11 11L15.5 8.5Z" fill="#EFA23D"/>
+      </svg>
+      TourMate
+    </a>
+    <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="nav-links">
+      <a href="dashboard.html" data-page="dashboard">Dashboard</a>
+      <a href="planner.html" data-page="planner">Tour Planner</a>
+      <a href="profile.html" data-page="profile">Profile</a>
+    </nav>
+    <div class="nav-right">
+      <span class="nav-user" data-nav-user></span>
+      <button class="btn btn-ghost btn-sm" data-logout type="button">Log out</button>
+    </div>
+  </div>
+</header>
+
+<main class="page-main">
+  <div class="container">
+    <div class="welcome-row">
+      <div>
+        <h1 id="welcomeHeading">Welcome back 👋</h1>
+        <p id="welcomeSub">Here's where your trips stand.</p>
+      </div>
+      <a href="planner.html" class="btn btn-primary">+ New tour</a>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-value" id="statTotal">0</div>
+        <div class="stat-label">Saved trips</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statUpcoming">0</div>
+        <div class="stat-label">Upcoming trips</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statBudget">$0</div>
+        <div class="stat-label">Total budget planned</div>
+      </div>
+    </div>
+
+    <div class="section-head">
+      <h2>Your tours</h2>
+      <p>Open a tour to keep planning, or start a new one.</p>
+    </div>
+
+    <div id="tourGrid" class="tour-grid"></div>
+
+    <div id="emptyState" class="empty-state" style="display:none;">
+      <h3>No trips yet</h3>
+      <p>Plan your first adventure — pick a destination, set your dates and budget, and TourMate keeps track of the rest.</p>
+      <a href="planner.html" class="btn btn-primary">Plan a tour</a>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="container">TourMate — a university ISD project</div>
+</footer>
+
+<script src="js/storage.js"></script>
+<script src="js/app.js"></script>
+<script src="js/dashboard.js"></script>
+</body>
+</html>

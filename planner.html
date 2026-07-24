@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tour Planner — TourMate</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%2314313A'/%3E%3Cpath d='M15.5 8.5L13 13L8.5 15.5L11 11L15.5 8.5Z' fill='%23EFA23D'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&amp;family=Inter:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<header class="navbar">
+  <div class="container">
+    <a href="dashboard.html" class="brand">
+      <svg viewBox="0 0 24 24" class="brand-mark" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="12" r="10.2" fill="none" stroke="#14313A" stroke-width="1.6"/>
+        <path d="M15.5 8.5L13 13L8.5 15.5L11 11L15.5 8.5Z" fill="#EFA23D"/>
+      </svg>
+      TourMate
+    </a>
+    <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="nav-links">
+      <a href="dashboard.html" data-page="dashboard">Dashboard</a>
+      <a href="planner.html" data-page="planner">Tour Planner</a>
+      <a href="profile.html" data-page="profile">Profile</a>
+    </nav>
+    <div class="nav-right">
+      <span class="nav-user" data-nav-user></span>
+      <button class="btn btn-ghost btn-sm" data-logout type="button">Log out</button>
+    </div>
+  </div>
+</header>
+
+<main class="page-main">
+  <div class="container">
+    <div class="planner-head">
+      <div>
+        <a href="dashboard.html" class="back-link">← Back to dashboard</a>
+        <h1 id="plannerTitle">Plan a new tour</h1>
+      </div>
+      <div class="planner-actions">
+        <button class="btn btn-danger" id="deleteTourBtn" type="button" style="display:none;">Delete tour</button>
+        <button class="btn btn-primary" id="saveTourBtn" type="button">Save tour</button>
+      </div>
+    </div>
+
+    <div class="planner-grid">
+      <!-- main column -->
+      <div class="planner-main">
+
+        <div class="card">
+          <div class="card-title"><h2>Trip details</h2></div>
+
+          <div class="field">
+            <label for="destinationInput">Destination</label>
+            <input type="text" id="destinationInput" placeholder="e.g. Cox's Bazar, Bangladesh" />
+            <div class="field-error" id="destinationError"></div>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="startDateInput">Start date</label>
+              <input type="date" id="startDateInput" />
+            </div>
+            <div class="field">
+              <label for="endDateInput">End date</label>
+              <input type="date" id="endDateInput" />
+            </div>
+          </div>
+          <div class="field-error" id="dateError"></div>
+
+          <div class="field" style="margin-bottom:0;">
+            <label for="budgetInput">Total budget ($)</label>
+            <input type="number" id="budgetInput" min="0" step="1" placeholder="e.g. 500" />
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <h2>Expenses</h2>
+            <span class="card-hint">Saved instantly</span>
+          </div>
+
+          <form class="expense-form" id="expenseForm">
+            <div class="field" style="margin-bottom:0;">
+              <label for="expenseName">Item</label>
+              <input type="text" id="expenseName" placeholder="e.g. Bus tickets" />
+            </div>
+            <div class="field" style="margin-bottom:0;">
+              <label for="expenseCategory">Category</label>
+              <select id="expenseCategory">
+                <option>Transport</option>
+                <option>Stay</option>
+                <option>Food</option>
+                <option>Activities</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="field" style="margin-bottom:0;">
+              <label for="expenseAmount">Amount</label>
+              <input type="number" id="expenseAmount" min="0" step="1" placeholder="0" />
+            </div>
+            <button type="submit" class="btn btn-dark">Add</button>
+          </form>
+          <div class="field-error" id="expenseError"></div>
+
+          <ul class="expense-list" id="expenseList"></ul>
+          <div class="expense-total-row">
+            <span>Total spent</span>
+            <span id="expenseTotal">$0</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><h2>Notes</h2><span class="card-hint">Saved with your trip</span></div>
+          <textarea id="notesInput" placeholder="Packing reminders, must-see spots, visa notes..."></textarea>
+        </div>
+      </div>
+
+      <!-- sidebar -->
+      <div class="planner-sidebar">
+        <div class="card">
+          <div class="card-title"><h2>Trip summary</h2></div>
+          <div class="summary-list">
+            <div class="summary-row"><span>Destination</span><span class="value" id="summaryDestination">—</span></div>
+            <div class="summary-row"><span>Dates</span><span class="value" id="summaryDates">—</span></div>
+            <div class="summary-row"><span>Duration</span><span class="value" id="summaryDuration">—</span></div>
+            <div class="summary-row"><span>Budget</span><span class="value" id="summaryBudget">$0</span></div>
+            <div class="summary-row"><span>Spent</span><span class="value" id="summarySpent">$0</span></div>
+            <div class="summary-row"><span>Remaining</span><span class="value" id="summaryRemaining">$0</span></div>
+          </div>
+          <div class="progress-track summary-progress"><div class="progress-fill" id="summaryProgressFill" style="width:0%"></div></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><h2>Weather</h2><span class="card-hint">Open-Meteo</span></div>
+          <div id="weatherBody">
+            <div class="weather-placeholder">Add a destination and check the weather.</div>
+          </div>
+          <button class="btn btn-outline btn-sm btn-block" id="weatherBtn" type="button" style="margin-top:14px;">Check weather</button>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><h2>Map</h2><span class="card-hint">Leaflet + OSM</span></div>
+          <div id="map"></div>
+          <div class="map-caption" id="mapCaption">Add a destination to see it on the map.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="js/storage.js"></script>
+<script src="js/app.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="js/map.js"></script>
+<script src="js/weather.js"></script>
+<script src="js/planner.js"></script>
+</body>
+</html>

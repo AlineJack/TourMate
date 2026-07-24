@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Profile — TourMate</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%2314313A'/%3E%3Cpath d='M15.5 8.5L13 13L8.5 15.5L11 11L15.5 8.5Z' fill='%23EFA23D'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&amp;family=Inter:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<header class="navbar">
+  <div class="container">
+    <a href="dashboard.html" class="brand">
+      <svg viewBox="0 0 24 24" class="brand-mark" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="12" r="10.2" fill="none" stroke="#14313A" stroke-width="1.6"/>
+        <path d="M15.5 8.5L13 13L8.5 15.5L11 11L15.5 8.5Z" fill="#EFA23D"/>
+      </svg>
+      TourMate
+    </a>
+    <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="nav-links">
+      <a href="dashboard.html" data-page="dashboard">Dashboard</a>
+      <a href="planner.html" data-page="planner">Tour Planner</a>
+      <a href="profile.html" data-page="profile">Profile</a>
+    </nav>
+    <div class="nav-right">
+      <span class="nav-user" data-nav-user></span>
+      <button class="btn btn-ghost btn-sm" data-logout type="button">Log out</button>
+    </div>
+  </div>
+</header>
+
+<main class="page-main">
+  <div class="container profile-wrap">
+    <div class="card profile-card fade-in">
+      <div class="avatar-circle" id="avatarCircle">?</div>
+      <h1 class="profile-name" id="profileName">—</h1>
+      <div class="profile-email" id="profileEmail">—</div>
+
+      <div id="guestNote" class="guest-note" style="display:none;">
+        You're browsing as a guest. Create a free account to keep this device's trips tied to an email and password.
+      </div>
+
+      <div class="profile-stats">
+        <div>
+          <div class="stat-value" id="profilePlanCount">0</div>
+          <div class="stat-label">Saved plans</div>
+        </div>
+      </div>
+
+      <button class="btn btn-outline btn-block" id="profileLogoutBtn" type="button">Log out</button>
+      <a href="login.html?tab=register" class="btn btn-primary btn-block" id="createAccountBtn" style="display:none;margin-top:10px;">Create free account</a>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="container">TourMate — a university ISD project</div>
+</footer>
+
+<script src="js/storage.js"></script>
+<script src="js/app.js"></script>
+<script src="js/profile.js"></script>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TourMate — Plan your next trip</title>
+<meta name="description" content="TourMate helps you plan a trip: pick a destination, set your dates and budget, track expenses, and keep notes — all in one simple dashboard." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%2314313A'/%3E%3Cpath d='M15.5 8.5L13 13L8.5 15.5L11 11L15.5 8.5Z' fill='%23EFA23D'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&amp;family=Inter:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<header class="navbar">
+  <div class="container">
+    <a href="index.html" class="brand">
+      <svg viewBox="0 0 24 24" class="brand-mark" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="12" r="10.2" fill="none" stroke="#14313A" stroke-width="1.6"/>
+        <path d="M15.5 8.5L13 13L8.5 15.5L11 11L15.5 8.5Z" fill="#EFA23D"/>
+      </svg>
+      TourMate
+    </a>
+    <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="nav-links" id="homeNavLinks">
+      <!-- filled in by home.js depending on whether someone is already signed in -->
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <svg class="hero-route" viewBox="0 0 900 420" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <path d="M40 340 C 220 380, 300 120, 470 190 S 760 60, 860 100" fill="none" stroke="#EFA23D" stroke-width="2" stroke-dasharray="2 10" stroke-linecap="round"/>
+      <circle cx="40" cy="340" r="5" fill="#EFA23D"/>
+      <circle cx="470" cy="190" r="5" fill="#EFA23D"/>
+      <circle cx="860" cy="100" r="6" fill="#EFA23D"/>
+      <circle cx="860" cy="100" r="10" fill="none" stroke="#EFA23D" stroke-width="1.4"/>
+    </svg>
+
+    <div class="container">
+      <div class="hero-inner">
+        <span class="hero-eyebrow">Smart Travel Planning</span>
+        <h1>Plan every trip without the spreadsheet chaos.</h1>
+        <p>TourMate keeps your destination, dates, budget, expenses, and notes in one simple place — with a quick weather check and a map preview built right in.</p>
+        <div class="hero-actions">
+          <a href="login.html" class="btn btn-primary" id="registerBtn">Create free account</a>
+          <a href="login.html?tab=login" class="btn btn-outline">Log in</a>
+        </div>
+        <button class="hero-guest" id="guestBtn" type="button">Or continue as guest →</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <h2>How it works</h2>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">01</div>
+          <h3>Set up your trip</h3>
+          <p>Add a destination, your travel dates and a total budget to start a new tour plan.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">02</div>
+          <h3>Track as you go</h3>
+          <p>Log expenses by category, write down notes and watch your remaining budget update live.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">03</div>
+          <h3>Check the essentials</h3>
+          <p>A small weather preview and map keep the trip's context in view without leaving the page.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">TourMate</div>
+</footer>
+
+<script src="js/storage.js"></script>
+<script src="js/app.js"></script>
+<script src="js/home.js"></script>
+</body>
+</html>
