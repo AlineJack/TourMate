@@ -1147,6 +1147,53 @@ input:focus, select:focus, textarea:focus {
   margin-bottom: 20px;
 }
 
+/* ---------- Profile: details (view mode) ---------- */
+.profile-details {
+  text-align: left;
+  margin-bottom: 22px;
+}
+
+.profile-detail {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.profile-detail:last-child {
+  border-bottom: none;
+}
+
+.profile-detail-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 3px;
+}
+
+.profile-detail-value {
+  font-size: 0.95rem;
+  color: var(--ink);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ---------- Profile: edit form ---------- */
+.profile-form {
+  text-align: left;
+  margin-top: 4px;
+}
+
+.profile-form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.profile-form-actions .btn {
+  flex: 1;
+}
+
 /* ---------- Footer ---------- */
 .site-footer {
   border-top: 1px solid var(--border);

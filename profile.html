@@ -47,15 +47,71 @@
         You're browsing as a guest. Create a account to keep this device's trips tied to an email and password.
       </div>
 
-      <div class="profile-stats">
-        <div>
-          <div class="stat-value" id="profilePlanCount">0</div>
-          <div class="stat-label">Saved plans</div>
+      <!-- View mode -->
+      <div id="profileViewMode">
+        <div class="profile-details">
+          <div class="profile-detail">
+            <div class="profile-detail-label">Bio</div>
+            <div class="profile-detail-value" id="profileBioView">Not set</div>
+          </div>
+          <div class="profile-detail">
+            <div class="profile-detail-label">Gender</div>
+            <div class="profile-detail-value" id="profileGenderView">Not set</div>
+          </div>
+          <div class="profile-detail">
+            <div class="profile-detail-label">Home address</div>
+            <div class="profile-detail-value" id="profileAddressView">Not set</div>
+          </div>
         </div>
+
+        <div class="profile-stats">
+          <div>
+            <div class="stat-value" id="profilePlanCount">0</div>
+            <div class="stat-label">Saved plans</div>
+          </div>
+        </div>
+
+        <button class="btn btn-outline btn-block" id="editProfileBtn" type="button">Edit profile</button>
+        <button class="btn btn-outline btn-block" id="profileLogoutBtn" type="button" style="margin-top:10px;">Log out</button>
+        <a href="login.html?tab=register" class="btn btn-primary btn-block" id="createAccountBtn" style="display:none;margin-top:10px;">Create free account</a>
       </div>
 
-      <button class="btn btn-outline btn-block" id="profileLogoutBtn" type="button">Log out</button>
-      <a href="login.html?tab=register" class="btn btn-primary btn-block" id="createAccountBtn" style="display:none;margin-top:10px;">Create free account</a>
+      <!-- Edit mode -->
+      <form class="profile-form" id="profileForm" style="display:none;" novalidate>
+        <div class="form-message" id="profileFormMessage"></div>
+
+        <div class="field">
+          <label for="profileNameInput">Full name</label>
+          <input type="text" id="profileNameInput" autocomplete="name" placeholder="Your name" />
+          <div class="field-error" id="profileNameError"></div>
+        </div>
+
+        <div class="field">
+          <label for="profileBioInput">Bio</label>
+          <textarea id="profileBioInput" placeholder="A little about you and how you like to travel"></textarea>
+          <div class="field-error" id="profileBioError"></div>
+        </div>
+
+        <div class="field">
+          <label for="profileGenderInput">Gender</label>
+          <select id="profileGenderInput">
+            <option value="">Prefer not to say</option>
+            <option value="female">Female</option>
+            <option value="male">Male</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="profileAddressInput">Home address</label>
+          <input type="text" id="profileAddressInput" autocomplete="street-address" placeholder="City, country" />
+          <div class="field-error" id="profileAddressError"></div>
+        </div>
+
+        <div class="profile-form-actions">
+          <button type="button" class="btn btn-outline" id="cancelEditBtn">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="saveProfileBtn">Save changes</button>
+        </div>
+      </form>
     </div>
   </div>
 </main>
@@ -63,6 +119,13 @@
 <footer class="site-footer">
   <div class="container">TourMate</div>
 </footer>
+
+<!-- Firebase SDK (compat build — works with plain <script> tags, no bundler needed) -->
+<script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-storage-compat.js"></script>
+<script src="js/firebase-config.js"></script>
 
 <script src="js/storage.js"></script>
 <script src="js/app.js"></script>

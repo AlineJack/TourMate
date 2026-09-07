@@ -61,8 +61,11 @@ function initNavbar(currentPage) {
   const logoutBtn = qs("[data-logout]");
   if (logoutBtn) {
     logoutBtn.addEventListener("click", () => {
-      clearSession();
-      window.location.href = "index.html";
+      // clearSession() now also calls auth.signOut() (returns a Promise).
+      // We redirect after Firebase confirms the sign-out is complete.
+      clearSession().then(() => {
+        window.location.href = "index.html";
+      });
     });
   }
 }

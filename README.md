@@ -10,7 +10,7 @@ A small tour-planning web app built for a university ISD project, using only **H
 | Login / Register | `login.html` | One card, two tabs — log in or create an account — plus a guest option |
 | Dashboard | `dashboard.html` | Welcome message, quick stats, and your saved tours as "luggage tag" cards |
 | Tour Planner | `planner.html` | The main page: destination, dates, budget, expenses, notes, weather preview, map preview, and a live trip summary |
-| Profile | `profile.html` | Name, email, saved plan count, and log out |
+| Profile | `profile.html` | Name, email, bio, gender, home address, saved plan count, editing, and log out |
 
 ## How to run it
 
@@ -25,13 +25,13 @@ Either way works — a local server just avoids occasional browser restrictions 
 
 ## How data is stored
 
-There is no backend or database. Everything is saved in the browser's `localStorage`:
+Accounts run through **Firebase Authentication**. Everything else — tour plans and the extra profile fields (bio, gender, home address) — is saved in the browser's `localStorage`:
 
-- `tourmate_users` — registered accounts (demo only — see note below)
-- `tourmate_session` — who is currently signed in (a real user or a guest)
+- `tourmate_session` — who is currently signed in (a real user or a guest), cached locally from Firebase Auth
 - `tourmate_tours` — every saved tour plan, each tagged with an owner
+- `tourmate_profiles` — bio/gender/home address, keyed by owner (Firebase uid, or `"guest"`) — name itself is stored as the Firebase Auth `displayName` instead
 
-Because it's `localStorage`, data is local to one browser on one device. Clearing your browser's site data will reset the app.
+Because it's `localStorage`, that data is local to one browser on one device. Clearing your browser's site data will reset it (a signed-in account's name still comes back from Firebase, since that part lives server-side).
 
 **Note on accounts:** since this project intentionally has no server, passwords are stored in plain text in `localStorage` purely so sign-up/login can work end to end for the demo. A real product would send credentials to a server and store a salted hash there instead — never do this in production.
 
