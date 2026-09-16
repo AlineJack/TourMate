@@ -9,7 +9,7 @@
   })();
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Dashboard — TourMate</title>
+<title id="pageTitle">Destination — TourMate</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%2314313A'/%3E%3Cpath d='M15.5 8.5L13 13L8.5 15.5L11 11L15.5 8.5Z' fill='%23EFA23D'/%3E%3C/svg%3E" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -48,65 +48,77 @@
 
 <main class="page-main">
   <div class="container">
-    <div class="welcome-row">
-      <div>
-        <h1 id="welcomeHeading">Welcome back 👋</h1>
-        <p id="welcomeSub">Here's where your trips stand.</p>
+
+    <div id="destNotFound" style="display:none;" class="empty-state">
+      <h3>Destination not found</h3>
+      <p>That destination isn't in TourMate's catalog yet.</p>
+      <a href="explore.html" class="btn btn-primary">Back to Explore</a>
+    </div>
+
+    <div id="destContent" style="display:none;">
+      <a href="explore.html" class="back-link">← Back to Explore</a>
+
+      <div class="dest-hero" id="destHero"></div>
+
+      <div class="welcome-row">
+        <div>
+          <span class="guide-badge">TourMate Guide</span>
+          <h1 id="destName">Destination</h1>
+          <p id="destRegion" class="dest-region-lg"></p>
+          <div class="dest-tags" id="destTagsRow"></div>
+        </div>
+        <button type="button" class="btn btn-primary" id="planTripBtn">Plan this trip</button>
       </div>
-      <a href="planner.html" class="btn btn-primary">+ New tour</a>
-    </div>
 
-    <div class="stat-row">
-      <div class="stat-card">
-        <div class="stat-value" id="statTotal">0</div>
-        <div class="stat-label">Saved trips</div>
+      <p id="destDescription" class="dest-description"></p>
+
+      <div class="stat-row">
+        <div class="stat-card">
+          <div class="stat-value" id="destDaysStat">—</div>
+          <div class="stat-label">Recommended stay</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="destBudgetStat">—</div>
+          <div class="stat-label">Approx. budget / person</div>
+        </div>
       </div>
-      <div class="stat-card">
-        <div class="stat-value" id="statUpcoming">0</div>
-        <div class="stat-label">Upcoming trips</div>
+
+      <div class="detail-columns">
+        <div class="card">
+          <div class="card-title"><h3>Things to do</h3></div>
+          <ul class="bullet-list" id="destThingsToDo"></ul>
+        </div>
+        <div class="card">
+          <div class="card-title"><h3>Places to visit</h3></div>
+          <ul class="bullet-list" id="destPlacesToVisit"></ul>
+        </div>
+        <div class="card">
+          <div class="card-title"><h3>Before you go</h3></div>
+          <ul class="bullet-list" id="destPrepGuidance"></ul>
+        </div>
       </div>
-      <div class="stat-card">
-        <div class="stat-value" id="statBudget">—</div>
-        <div class="stat-label">Total budget planned</div>
+
+      <div class="pros-cons-row">
+        <div class="card pros-card">
+          <div class="card-title"><h3>Pros</h3></div>
+          <ul class="bullet-list" id="destPros"></ul>
+        </div>
+        <div class="card cons-card">
+          <div class="card-title"><h3>Cons</h3></div>
+          <ul class="bullet-list" id="destCons"></ul>
+        </div>
       </div>
+
+      <div class="section-head">
+        <h2>Traveler Experiences</h2>
+        <p>Real trips other TourMate users have shared for this destination.</p>
+      </div>
+
+      <div id="destExperiencesRow" class="discover-row"></div>
+
+      <a id="shareExperienceLink" href="experience-form.html" class="btn btn-outline share-experience-cta">Share your experience here</a>
     </div>
 
-    <div class="section-head">
-      <h2>Your tours</h2>
-      <p>Open a tour to keep planning, or start a new one.</p>
-    </div>
-
-    <div id="tourGrid" class="tour-grid"></div>
-
-    <div id="emptyState" class="empty-state" style="display:none;">
-      <h3>No trips yet</h3>
-      <p>Plan your first adventure — pick a destination, set your dates and budget, and TourMate keeps track of the rest.</p>
-      <a href="planner.html" class="btn btn-primary">Plan a tour</a>
-    </div>
-
-    <!-- ===== Home Recommendations (PART 4) ===== -->
-    <div class="section-head discover-head">
-      <h2>Don't know where to go yet?</h2>
-      <p>Start browsing — no destination required.</p>
-    </div>
-
-    <div class="discover-row" id="recommendedRow"></div>
-
-    <div class="section-head">
-      <h2>Popular Destinations</h2>
-      <p>TourMate's full curated list — same data Explore and destination pages use.</p>
-    </div>
-    <div class="discover-row" id="popularDestinationsRow"></div>
-
-    <div class="inspiration-row" id="inspirationRow"></div>
-
-    <div class="suggestions-row" id="suggestionsRow"></div>
-
-    <div class="section-head">
-      <h2>From other travelers</h2>
-      <p>Real trips, shared by people who've already been.</p>
-    </div>
-    <div class="discover-row" id="popularExperiencesRow"></div>
   </div>
 </main>
 
@@ -127,6 +139,6 @@
 <script src="js/roles.js"></script>
 <script src="js/app.js"></script>
 <script src="js/destinations.js"></script>
-<script src="js/dashboard.js"></script>
+<script src="js/destination.js"></script>
 </body>
 </html>

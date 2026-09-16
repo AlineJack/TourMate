@@ -2,7 +2,18 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
+<script>
+  (function () {
+    var theme = localStorage.getItem("tourmate_theme") === "dark" ? "dark" : "light";
+    document.documentElement.setAttribute("data-theme", theme);
+  })();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!-- OpenStreetMap's tile usage policy requires a Referer on tile requests.
+     This is already the modern browser default, so it changes nothing for
+     other requests, but it stops a stricter default or an injected
+     no-referrer policy from getting our tiles blocked. -->
+<meta name="referrer" content="strict-origin-when-cross-origin" />
 <title>Tour Planner — TourMate</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%2314313A'/%3E%3Cpath d='M15.5 8.5L13 13L8.5 15.5L11 11L15.5 8.5Z' fill='%23EFA23D'/%3E%3C/svg%3E" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -27,10 +38,14 @@
     </button>
     <nav class="nav-links">
       <a href="dashboard.html" data-page="dashboard">Dashboard</a>
+      <a href="explore.html" data-page="explore">Explore</a>
       <a href="planner.html" data-page="planner">Tour Planner</a>
+      <a href="experiences.html" data-page="experiences">Experiences</a>
+      <a href="checklist.html" data-page="checklist">Checklist</a>
       <a href="profile.html" data-page="profile">Profile</a>
     </nav>
     <div class="nav-right">
+      <button class="theme-toggle-btn" data-theme-toggle type="button" aria-label="Toggle dark mode">🌙</button>
       <span class="nav-user" data-nav-user></span>
       <button class="btn btn-ghost btn-sm" data-logout type="button">Log out</button>
     </div>
@@ -45,10 +60,13 @@
         <h1 id="plannerTitle">Plan a new tour</h1>
       </div>
       <div class="planner-actions">
+        <button class="btn btn-outline" id="shareTripBtn" type="button" style="display:none;">Share / Invite</button>
         <button class="btn btn-danger" id="deleteTourBtn" type="button" style="display:none;">Delete tour</button>
         <button class="btn btn-primary" id="saveTourBtn" type="button">Save tour</button>
       </div>
     </div>
+
+    <div id="sharedTripNotice" class="shared-trip-notice" style="display:none;"></div>
 
     <div class="planner-grid">
       <!-- main column -->
@@ -61,6 +79,7 @@
             <label for="destinationInput">Destination</label>
             <input type="text" id="destinationInput" placeholder="e.g. Cox's Bazar, Bangladesh" />
             <div class="field-error" id="destinationError"></div>
+            <div class="field-hint">Press Enter or tap "Check weather" to preview it on the map →</div>
           </div>
 
           <div class="field-row">
@@ -75,9 +94,20 @@
           </div>
           <div class="field-error" id="dateError"></div>
 
+          <div class="field-row">
+            <div class="field">
+              <label for="travelersInput">Number of travelers</label>
+              <input type="number" id="travelersInput" min="1" step="1" value="1" />
+            </div>
+            <div class="field">
+              <label for="currencyInput">Currency</label>
+              <select id="currencyInput"></select>
+            </div>
+          </div>
+
           <div class="field" style="margin-bottom:0;">
-            <label for="budgetInput">Total budget ($)</label>
-            <input type="number" id="budgetInput" min="0" step="1" placeholder="e.g. 500" />
+            <label for="budgetInput">Total budget</label>
+            <input type="number" id="budgetInput" min="0" step="1" placeholder="e.g. 20000" />
           </div>
         </div>
 
@@ -113,13 +143,27 @@
           <ul class="expense-list" id="expenseList"></ul>
           <div class="expense-total-row">
             <span>Total spent</span>
-            <span id="expenseTotal">$0</span>
+            <span id="expenseTotal">—</span>
           </div>
         </div>
 
         <div class="card">
           <div class="card-title"><h2>Notes</h2><span class="card-hint">Saved with your trip</span></div>
           <textarea id="notesInput" placeholder="Packing reminders, must-see spots, visa notes..."></textarea>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <h2>Checklist</h2>
+            <span class="card-hint">Saved with your trip</span>
+          </div>
+
+          <form class="inline-add-row" id="checklistForm">
+            <input type="text" id="checklistInput" class="field-input" placeholder="e.g. Power bank" />
+            <button type="submit" class="btn btn-dark">Add</button>
+          </form>
+
+          <ul class="checklist-list" id="checklistList"></ul>
         </div>
       </div>
 
@@ -131,9 +175,13 @@
             <div class="summary-row"><span>Destination</span><span class="value" id="summaryDestination">—</span></div>
             <div class="summary-row"><span>Dates</span><span class="value" id="summaryDates">—</span></div>
             <div class="summary-row"><span>Duration</span><span class="value" id="summaryDuration">—</span></div>
-            <div class="summary-row"><span>Budget</span><span class="value" id="summaryBudget">$0</span></div>
-            <div class="summary-row"><span>Spent</span><span class="value" id="summarySpent">$0</span></div>
-            <div class="summary-row"><span>Remaining</span><span class="value" id="summaryRemaining">$0</span></div>
+            <div class="summary-row"><span>Travelers</span><span class="value" id="summaryTravelers">1</span></div>
+            <div class="summary-row"><span>Total budget</span><span class="value" id="summaryBudget">—</span></div>
+            <div class="summary-row summary-row-sub"><span>Budget / person</span><span class="value" id="summaryBudgetPerPerson">—</span></div>
+            <div class="summary-row"><span>Total spent</span><span class="value" id="summarySpent">—</span></div>
+            <div class="summary-row summary-row-sub"><span>Spent / person</span><span class="value" id="summarySpentPerPerson">—</span></div>
+            <div class="summary-row"><span>Remaining</span><span class="value" id="summaryRemaining">—</span></div>
+            <div class="summary-row summary-row-sub"><span>Remaining / person</span><span class="value" id="summaryRemainingPerPerson">—</span></div>
           </div>
           <div class="progress-track summary-progress"><div class="progress-fill" id="summaryProgressFill" style="width:0%"></div></div>
         </div>
@@ -147,25 +195,61 @@
         </div>
 
         <div class="card">
-          <div class="card-title"><h2>Map</h2><span class="card-hint">Leaflet + OSM</span></div>
+          <div class="card-title"><h2>Map</h2><span class="card-hint">Leaflet + OpenFreeMap</span></div>
           <div id="map"></div>
-          <div class="map-caption" id="mapCaption">Add a destination to see it on the map.</div>
+          <div class="map-caption" id="mapCaption">Add a destination, then press Enter or tap "Check weather" to see it here.</div>
         </div>
       </div>
     </div>
   </div>
 </main>
 
+<!-- Share / Invite dialog -->
+<div id="shareModal" class="modal-overlay" style="display:none;" aria-hidden="true">
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="shareModalTitle">
+    <div class="modal-head">
+      <h3 id="shareModalTitle">Share this trip</h3>
+      <button type="button" class="icon-btn" id="shareModalClose" aria-label="Close">✕</button>
+    </div>
+    <p class="modal-text">
+      Anyone with this link can import their own editable copy of this trip. This is local-first,
+      so it's not live sync — changes made on another device aren't automatically reflected here.
+      Use "Share / Invite" again any time after you make changes to send an updated link.
+    </p>
+    <div class="field" style="margin-bottom:0;">
+      <label for="shareLinkInput">Share link</label>
+      <div class="share-link-row">
+        <input type="text" id="shareLinkInput" class="field-input" readonly />
+        <button type="button" class="btn btn-primary btn-sm" id="shareCopyBtn">Copy link</button>
+      </div>
+      <div class="field-hint" id="shareModalStatus" role="status"></div>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-outline btn-sm" id="shareNativeBtn" style="display:none;">Share via…</button>
+      <button type="button" class="btn btn-ghost btn-sm" id="shareModalCloseBtn">Close</button>
+    </div>
+  </div>
+</div>
+
 <!-- Firebase SDK (compat build — works with plain <script> tags, no bundler needed) -->
 <script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-storage-compat.js"></script>
 <script src="js/firebase-config.js"></script>
 
 <script src="js/storage.js"></script>
+<script src="js/tour-store.js"></script>
+<script src="js/experience-store.js"></script>
+<script src="js/profile-store.js"></script>
+<script src="js/settings-store.js"></script>
+<script src="js/roles.js"></script>
 <script src="js/app.js"></script>
+<script src="js/destinations.js"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- Base map: OpenFreeMap vector tiles (free, keyless) drawn by MapLibre GL
+     and wrapped as an ordinary Leaflet layer. Leaflet still owns the map,
+     the markers and every gesture; this only replaces the tile source. -->
+<script src="https://unpkg.com/maplibre-gl@5.9.0/dist/maplibre-gl.js"></script>
+<script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.4/leaflet-maplibre-gl.js"></script>
 <script src="js/map.js"></script>
 <script src="js/weather.js"></script>
 <script src="js/planner.js"></script>

@@ -10,7 +10,10 @@
 
   if (session) {
     // already signed in (or guest) — no need to push login/register again
-    navLinks.innerHTML = '<a href="dashboard.html" class="active">Go to dashboard</a>';
+    navLinks.innerHTML = '<a href="dashboard.html" class="active">Go to dashboard</a>' +
+      (typeof isAdminSession === "function" && isAdminSession(session)
+        ? '<a href="admin.html">Admin</a>'
+        : "");
     heroActions.innerHTML =
       '<a href="dashboard.html" class="btn btn-primary">Go to dashboard</a>' +
       '<a href="profile.html" class="btn btn-outline">View profile</a>';
@@ -26,11 +29,15 @@
     });
   }
 
+  // The home page has a custom navbar, so its theme toggle must be wired here.
+  initThemeToggle();
+
   // mobile menu toggle (same behaviour as initNavbar, home page has a custom nav so wire it directly)
   const toggle = qs(".nav-toggle");
   if (toggle) {
     toggle.addEventListener("click", () => {
-      navLinks.classList.toggle("open");
+      const open = navLinks.classList.toggle("open");
+      toggle.setAttribute("aria-expanded", String(open));
     });
   }
 })();

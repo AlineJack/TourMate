@@ -3,6 +3,32 @@
    ========================================================= */
 
 (function () {
+  /* ---------- static data ----------
+     These must stay ABOVE the render calls below. `const` bindings are
+     hoisted but sit in the Temporal Dead Zone until their declaration is
+     evaluated, so a render call placed before them threw
+     "Cannot access 'INSPIRATION_CHIPS' before initialization".
+     Function declarations are fully hoisted, so the render functions
+     themselves can stay further down — only the data has to move up. */
+
+  const INSPIRATION_CHIPS = [
+    { emoji: "⛰️", label: "Mountain escape", tag: "mountain" },
+    { emoji: "🌿", label: "Nature trip", tag: "nature" },
+    { emoji: "🏖️", label: "Beach trip", tag: "beach" },
+    { emoji: "🧗", label: "Adventure trip", tag: "adventure" },
+    { emoji: "💰", label: "Budget trip", tag: "budget" },
+    { emoji: "🎒", label: "Weekend trip", tag: "weekend" },
+  ];
+
+  const HELPFUL_SUGGESTIONS = [
+    { text: "Have only 2 days?", href: "guide.html?q=" + encodeURIComponent("I have 2 days") },
+    { text: "Looking for a budget trip?", href: "explore.html?tag=budget" },
+    { text: "Want a nature destination?", href: "explore.html?tag=nature" },
+    { text: "Explore trips shared by travelers.", href: "experiences.html" },
+  ];
+
+  /* ---------- boot ---------- */
+
   const session = requireAuth();
   if (!session) return;
   initNavbar("dashboard");
@@ -10,6 +36,11 @@
   qs("#welcomeHeading").textContent = "Welcome back, " + session.name + " 👋";
 
   renderDashboard();
+  renderRecommendedDestinations();
+  renderPopularDestinations();
+  renderTravelInspiration();
+  renderHelpfulSuggestions();
+  renderPopularExperiences();
 
   function renderDashboard() {
     const tours = getToursForOwner(session.ownerId);
@@ -18,11 +49,9 @@
     const upcomingCount = tours.filter(
       (t) => getTourStatus(t.startDate, t.endDate) === "upcoming"
     ).length;
-    const totalBudget = tours.reduce((sum, t) => sum + (Number(t.budget) || 0), 0);
-
     qs("#statTotal").textContent = tours.length;
     qs("#statUpcoming").textContent = upcomingCount;
-    qs("#statBudget").textContent = formatMoney(totalBudget);
+    qs("#statBudget").textContent = formatMixedCurrencyTotal(tours, (t) => Number(t.budget) || 0);
     qs("#welcomeSub").textContent =
       tours.length === 0
         ? "You haven't planned any trips yet."
@@ -58,10 +87,11 @@
       escapeHtml(tour.destination || "Untitled trip") +
       '">' +
       '<span class="tag-ribbon ' + status + '">' + statusLabel(status) + "</span>" +
+      (tour.sharedMode === "shared" ? '<span class="guide-badge" style="display:inline-block;margin-bottom:8px;">Shared trip</span>' : "") +
       "<h3>" + escapeHtml(tour.destination || "Untitled trip") + "</h3>" +
       '<div class="tag-dates">' + formatDateRange(tour.startDate, tour.endDate) + "</div>" +
       '<div class="tag-budget-row">' +
-      '<div class="tag-figures"><span>' + formatMoney(spent) + " spent</span><span>" + formatMoney(budget) + " budget</span></div>" +
+      '<div class="tag-figures"><span>' + formatCurrency(spent, tour.currency) + " spent</span><span>" + formatCurrency(budget, tour.currency) + " budget</span></div>" +
       '<div class="progress-track"><div class="progress-fill' + (isOver ? " over-budget" : "") + '" style="width:' + percent + '%"></div></div>' +
       "</div>" +
       '<div class="tag-actions">' +
@@ -100,5 +130,66 @@
     if (status === "ongoing") return "Ongoing";
     if (status === "completed") return "Completed";
     return "Upcoming";
+  }
+
+  /* ---------- Home Recommendations (PART 4) ---------- */
+
+  // A small, deterministic-per-day rotation so "Recommended for you" isn't
+  // the exact same four destinations on every single visit, without needing
+  // any real personalization logic or extra reads.
+  function renderRecommendedDestinations() {
+    const all = getAllDestinations();
+    const dayOffset = new Date().getDate() % all.length;
+    const rotated = all.slice(dayOffset).concat(all.slice(0, dayOffset));
+    renderDestinationCards(qs("#recommendedRow"), rotated.slice(0, 4));
+  }
+
+  /** PART 15/16: the same DESTINATIONS source Explore and destination.html use — no separate database. */
+  function renderPopularDestinations() {
+    renderDestinationCards(qs("#popularDestinationsRow"), getAllDestinations());
+  }
+
+  function renderTravelInspiration() {
+    const row = qs("#inspirationRow");
+    row.innerHTML = "";
+    INSPIRATION_CHIPS.forEach((chip) => {
+      const a = document.createElement("a");
+      a.className = "inspiration-chip";
+      a.href = "explore.html?tag=" + encodeURIComponent(chip.tag);
+      a.innerHTML = '<span class="chip-emoji">' + chip.emoji + "</span>" + escapeHtml(chip.label);
+      row.appendChild(a);
+    });
+  }
+
+  function renderHelpfulSuggestions() {
+    const row = qs("#suggestionsRow");
+    row.innerHTML = "";
+    HELPFUL_SUGGESTIONS.forEach((s) => {
+      const a = document.createElement("a");
+      a.className = "suggestion-chip";
+      a.href = s.href;
+      a.innerHTML = "<span>" + escapeHtml(s.text) + '</span><span class="arrow">→</span>';
+      row.appendChild(a);
+    });
+  }
+
+  function renderPopularExperiences() {
+    const row = qs("#popularExperiencesRow");
+    const list = getPopularExperiences(3);
+
+    row.innerHTML = "";
+
+    if (list.length === 0) {
+      const empty = document.createElement("div");
+      empty.className = "empty-state";
+      empty.innerHTML =
+        "<h3>No traveler experiences yet</h3>" +
+        "<p>Be the first to share how your trip actually went.</p>" +
+        '<a href="experience-form.html" class="btn btn-primary">Share your experience</a>';
+      row.appendChild(empty);
+      return;
+    }
+
+    list.forEach((exp) => row.appendChild(buildExperienceCard(exp)));
   }
 })();

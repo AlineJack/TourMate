@@ -2,6 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
+<script>
+  (function () {
+    var theme = localStorage.getItem("tourmate_theme") === "dark" ? "dark" : "light";
+    document.documentElement.setAttribute("data-theme", theme);
+  })();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>TourMate — Plan your next trip</title>
 <meta name="description" content="TourMate helps you plan a trip: pick a destination, set your dates and budget, track expenses, and keep notes — all in one simple dashboard." />
@@ -28,6 +34,9 @@
     <nav class="nav-links" id="homeNavLinks">
       <!-- filled in by home.js depending on whether someone is already signed in -->
     </nav>
+    <div class="nav-right">
+      <button class="theme-toggle-btn" data-theme-toggle type="button" aria-label="Toggle dark mode">🌙</button>
+    </div>
   </div>
 </header>
 
@@ -88,12 +97,16 @@
 <!-- Firebase SDK (compat build — works with plain <script> tags, no bundler needed) -->
 <script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-storage-compat.js"></script>
 <script src="js/firebase-config.js"></script>
 
 <script src="js/storage.js"></script>
+<script src="js/tour-store.js"></script>
+<script src="js/experience-store.js"></script>
+<script src="js/profile-store.js"></script>
+<script src="js/settings-store.js"></script>
+<script src="js/roles.js"></script>
 <script src="js/app.js"></script>
+<script src="js/destinations.js"></script>
 <script src="js/home.js"></script>
 </body>
 </html>

@@ -1,57 +1,41 @@
 /* =========================================================
    storage.js
-   STEP 2 UPDATE: User/session functions now delegate to
-   Firebase Authentication. Tour data still uses localStorage
-   for now (Steps 3–8 will migrate it to Firestore).
-
-   WHAT CHANGED IN STEP 2
-   - Removed: getUsers(), saveUsers(), findUserByEmail(),
-     createUser() — Firebase Auth owns accounts now.
-   - Changed: getSession() still reads from localStorage, but
-     the stored value is now a lightweight snapshot written
-     by syncSessionFromFirebase() after Firebase confirms auth,
-     NOT a password-bearing user object.
-   - Changed: clearSession() now also calls auth.signOut().
-   - Added: syncSessionFromFirebase(firebaseUser) — call this
-     after Firebase confirms a user is signed in; it writes
-     the same shape that every other file already reads.
-   - Unchanged: every tour function (getAllTours, upsertTour,
-     deleteTour, etc.) — tours still live in localStorage.
-   - Unchanged: startGuestSession() — guest path is unchanged.
-   - Unchanged: generateId(), readJSON(), writeJSON() helpers.
-
-   WHY localStorage FOR THE SESSION SNAPSHOT?
-   All page JS files call getSession() synchronously at startup
-   (requireAuth, initNavbar, home.js). Firebase Auth is async,
-   so we cache the session object in localStorage after sign-in.
-   Firebase remains the source of truth — if the token expires,
-   onAuthStateChanged (in auth.js) clears the snapshot.
+   Low-level primitives only: JSON read/write (hardened against
+   corrupted data and full storage), ID generation, and the
+   signed-in session cache. Tour, experience, profile, and
+   settings data each have their own dedicated *-store.js file
+   that builds on these — see tour-store.js, experience-store.js,
+   profile-store.js, settings-store.js.
    ========================================================= */
-
-const STORAGE_KEYS = {
-  // "users" key removed — Firebase Auth owns accounts now
-  session:  "tourmate_session",
-  tours:    "tourmate_tours",
-  profiles: "tourmate_profiles", // bio/gender/home address, keyed by ownerId (uid or "guest")
-};
 
 /* ---------- small helpers ---------- */
 
+/** Reads and parses JSON from localStorage. Corrupted or missing data safely falls back. */
 function readJSON(key, fallback) {
   try {
     const raw = localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : fallback;
+    if (!raw) return fallback;
+    const parsed = JSON.parse(raw);
+    return parsed == null ? fallback : parsed;
   } catch (err) {
-    console.error("Could not read " + key + " from storage", err);
+    console.error("Could not read " + key + " from storage — using default.", err);
     return fallback;
   }
 }
 
+/**
+ * Writes JSON to localStorage. Returns true on success, false on failure
+ * (e.g. the browser's storage quota is full) so callers that need to know
+ * — like publishing an experience with photos — can show a real error
+ * instead of pretending the save worked.
+ */
 function writeJSON(key, value) {
   try {
     localStorage.setItem(key, JSON.stringify(value));
+    return true;
   } catch (err) {
     console.error("Could not save " + key + " to storage", err);
+    return false;
   }
 }
 
@@ -66,26 +50,35 @@ function generateId(prefix) {
 
 /* ---------- session ---------- */
 /*
-  The session object shape is the same as before so every
-  existing consumer (dashboard.js, profile.js, planner.js,
-  home.js, app.js) continues to work without any changes:
+  The session object shape is the same everywhere so every
+  consumer (dashboard.js, profile.js, planner.js, home.js,
+  app.js) continues to work without any changes:
 
   {
     ownerId:  string,   // Firebase uid, or "guest"
-    name:     string,   // displayName from Firebase
+    name:     string,   // displayName from Firebase, or locally edited
     email:    string,   // email from Firebase
     isGuest:  boolean
   }
+
+  Firebase Authentication remains the source of truth for WHO is
+  signed in (login, registration, email verification, guest mode
+  are all preserved). This cached copy is what lets every page
+  read "am I signed in, and as whom" synchronously and instantly,
+  and is also what keeps the app usable if Firebase is briefly
+  unreachable after the first sign-in.
 */
+
+const SESSION_KEY = "tourmate_session";
 
 /** Read the cached session. Returns null when nobody is signed in. */
 function getSession() {
-  return readJSON(STORAGE_KEYS.session, null);
+  return readJSON(SESSION_KEY, null);
 }
 
 /** Internal — only called by syncSessionFromFirebase() and startGuestSession(). */
 function setSession(session) {
-  writeJSON(STORAGE_KEYS.session, session);
+  writeJSON(SESSION_KEY, session);
 }
 
 /**
@@ -94,7 +87,7 @@ function setSession(session) {
  * Returns a Promise so callers can await it before redirecting.
  */
 function clearSession() {
-  localStorage.removeItem(STORAGE_KEYS.session);
+  localStorage.removeItem(SESSION_KEY);
   // auth is the global Firebase Auth handle created in firebase-config.js
   return auth.signOut();
 }
@@ -124,7 +117,7 @@ function startGuestSession() {
  * Merge a patch (e.g. { name: "New Name" }) into the cached session and
  * write it back, so every page that reads getSession() (navbar, dashboard,
  * profile) sees the change immediately without a full reload.
- * Used by profile.js after a successful profile edit.
+ * Used by profile-store.js after a local profile save.
  */
 function updateSessionFields(patch) {
   const session = getSession();
@@ -133,137 +126,4 @@ function updateSessionFields(patch) {
   const updated = Object.assign({}, session, patch);
   setSession(updated);
   return updated;
-}
-
-/* ---------- profile details: bio, gender, home address ---------- */
-/*
-  Firebase Auth's user object only holds displayName/email/photoURL — it
-  has no room for bio, gender, or home address. Like tour data, these
-  extra fields are kept in localStorage, keyed by ownerId (the Firebase
-  uid for a real account, or "guest" for a guest session) — one object,
-  same key, for every kind of session, so there's nothing extra to set
-  up in Firebase for this to work.
-
-  (An earlier version of this stored real accounts' details in Cloud
-  Firestore. That meant a profile save could hang indefinitely if the
-  Firestore database hadn't been created yet or its security rules
-  weren't in place — so it moved to localStorage, matching how tour
-  data already works.)
-
-  Both functions return a Promise so profile.js can use one code path
-  regardless of which kind of session is active.
-*/
-
-function getAllProfileExtras() {
-  return readJSON(STORAGE_KEYS.profiles, {});
-}
-
-/** Fetch { bio, gender, homeAddress } for the given session. Never rejects. */
-function loadProfileExtra(session) {
-  if (!session) return Promise.resolve({});
-  return Promise.resolve(getAllProfileExtras()[session.ownerId] || {});
-}
-
-/** Save { bio, gender, homeAddress } for the given session. Resolves with the saved data. */
-function saveProfileExtra(session, data) {
-  if (!session) return Promise.reject(new Error("No active session."));
-
-  const all = getAllProfileExtras();
-  all[session.ownerId] = data;
-  writeJSON(STORAGE_KEYS.profiles, all);
-
-  return Promise.resolve(data);
-}
-
-/**
- * Move all locally-saved guest tours to a newly-created Firebase account.
- * This lets a guest keep the trips they created after registering.
- *
- * Firebase Authentication creates the account before verification, but
- * the TourMate app does not allow that account into the app until the
- * email is verified. The transfer is local-only and does not expose data.
- */
-function migrateGuestToursToOwner(ownerId) {
-  if (!ownerId) return;
-
-  const tours = getAllTours();
-  let changed = false;
-
-  tours.forEach(function (tour) {
-    if (tour.ownerId === "guest") {
-      tour.ownerId = ownerId;
-      changed = true;
-    }
-  });
-
-  if (changed) {
-    saveAllTours(tours);
-  }
-}
-
-/* ---------- tours (unchanged from original) ---------- */
-
-function getAllTours() {
-  return readJSON(STORAGE_KEYS.tours, []);
-}
-
-function saveAllTours(tours) {
-  writeJSON(STORAGE_KEYS.tours, tours);
-}
-
-function getToursForOwner(ownerId) {
-  return getAllTours()
-    .filter((t) => t.ownerId === ownerId)
-    .sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
-}
-
-function getTourById(id) {
-  return getAllTours().find((t) => t.id === id) || null;
-}
-
-function createBlankTour(ownerId) {
-  return {
-    id:         null,   // assigned on first save
-    ownerId:    ownerId,
-    destination: "",
-    lat:        null,
-    lon:        null,
-    placeLabel: "",
-    startDate:  "",
-    endDate:    "",
-    budget:     0,
-    notes:      "",
-    expenses:   [],
-    createdAt:  null,
-    updatedAt:  null,
-  };
-}
-
-/** Creates the tour if it has no id yet, otherwise overwrites it. Returns the saved tour. */
-function upsertTour(tour) {
-  const tours = getAllTours();
-  const now   = new Date().toISOString();
-
-  if (!tour.id) {
-    tour.id        = generateId("tour");
-    tour.createdAt = now;
-    tour.updatedAt = now;
-    tours.push(tour);
-  } else {
-    const index = tours.findIndex((t) => t.id === tour.id);
-    tour.updatedAt = now;
-    if (index === -1) {
-      tours.push(tour);
-    } else {
-      tours[index] = tour;
-    }
-  }
-
-  saveAllTours(tours);
-  return tour;
-}
-
-function deleteTour(id) {
-  const tours = getAllTours().filter((t) => t.id !== id);
-  saveAllTours(tours);
 }

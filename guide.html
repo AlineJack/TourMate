@@ -9,7 +9,7 @@
   })();
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Dashboard — TourMate</title>
+<title>Guide — TourMate</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%2314313A'/%3E%3Cpath d='M15.5 8.5L13 13L8.5 15.5L11 11L15.5 8.5Z' fill='%23EFA23D'/%3E%3C/svg%3E" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -47,66 +47,23 @@
 </header>
 
 <main class="page-main">
-  <div class="container">
+  <div class="container container-narrow">
     <div class="welcome-row">
       <div>
-        <h1 id="welcomeHeading">Welcome back 👋</h1>
-        <p id="welcomeSub">Here's where your trips stand.</p>
-      </div>
-      <a href="planner.html" class="btn btn-primary">+ New tour</a>
-    </div>
-
-    <div class="stat-row">
-      <div class="stat-card">
-        <div class="stat-value" id="statTotal">0</div>
-        <div class="stat-label">Saved trips</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="statUpcoming">0</div>
-        <div class="stat-label">Upcoming trips</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="statBudget">—</div>
-        <div class="stat-label">Total budget planned</div>
+        <span class="guide-badge">TourMate Guide</span>
+        <h1>Ask the Guide</h1>
+        <p>Tell it how many days you have, your budget, or the kind of trip you want. It matches you against TourMate's destination list — no AI, just straightforward rules.</p>
       </div>
     </div>
 
-    <div class="section-head">
-      <h2>Your tours</h2>
-      <p>Open a tour to keep planning, or start a new one.</p>
-    </div>
+    <div class="chip-row" id="guideChips"></div>
 
-    <div id="tourGrid" class="tour-grid"></div>
+    <div class="guide-thread card" id="guideThread"></div>
 
-    <div id="emptyState" class="empty-state" style="display:none;">
-      <h3>No trips yet</h3>
-      <p>Plan your first adventure — pick a destination, set your dates and budget, and TourMate keeps track of the rest.</p>
-      <a href="planner.html" class="btn btn-primary">Plan a tour</a>
-    </div>
-
-    <!-- ===== Home Recommendations (PART 4) ===== -->
-    <div class="section-head discover-head">
-      <h2>Don't know where to go yet?</h2>
-      <p>Start browsing — no destination required.</p>
-    </div>
-
-    <div class="discover-row" id="recommendedRow"></div>
-
-    <div class="section-head">
-      <h2>Popular Destinations</h2>
-      <p>TourMate's full curated list — same data Explore and destination pages use.</p>
-    </div>
-    <div class="discover-row" id="popularDestinationsRow"></div>
-
-    <div class="inspiration-row" id="inspirationRow"></div>
-
-    <div class="suggestions-row" id="suggestionsRow"></div>
-
-    <div class="section-head">
-      <h2>From other travelers</h2>
-      <p>Real trips, shared by people who've already been.</p>
-    </div>
-    <div class="discover-row" id="popularExperiencesRow"></div>
+    <form id="guideForm" class="guide-input-row">
+      <input type="text" id="guideInput" class="field-input" placeholder="e.g. I have 3 days and ৳6,000" autocomplete="off" />
+      <button type="submit" class="btn btn-primary">Ask</button>
+    </form>
   </div>
 </main>
 
@@ -127,6 +84,6 @@
 <script src="js/roles.js"></script>
 <script src="js/app.js"></script>
 <script src="js/destinations.js"></script>
-<script src="js/dashboard.js"></script>
+<script src="js/guide.js"></script>
 </body>
 </html>

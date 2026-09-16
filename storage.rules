@@ -1,0 +1,37 @@
+/* =========================================================
+   storage.rules — TourMate
+
+   HOW TO APPLY THIS
+   Firebase Console -> Build -> Storage -> Rules tab -> paste
+   this in -> Publish.
+
+   TourMate only uses Firebase Storage for one thing: optional
+   photos on a Traveler Experience, uploaded to
+   experience-photos/{uid}/{experienceId}/{n}.jpg (already
+   resized/compressed in the browser before upload — see
+   compressImageForUpload() in js/experiences-data.js).
+   Profile-picture upload is intentionally not part of this
+   app (PART 14 of the spec), so there is nothing else to cover.
+   ========================================================= */
+
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    match /experience-photos/{uid}/{experienceId}/{fileName} {
+      allow read: if true;
+
+      allow write: if request.auth != null
+                   && request.auth.uid == uid
+                   && request.resource.size <= 3 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+
+      allow delete: if request.auth != null && request.auth.uid == uid;
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

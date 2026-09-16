@@ -1,0 +1,83 @@
+/* =========================================================
+   firestore.rules — TourMate
+
+   HOW TO APPLY THIS
+   1. Go to https://console.firebase.google.com -> your project
+      (tourmate007) -> Build -> Firestore Database -> Rules tab.
+   2. Replace whatever is there with the contents of this file
+      and click "Publish".
+   (If you use the Firebase CLI instead: `firebase deploy --only
+   firestore:rules` after adding this path to firebase.json.)
+
+   WHAT THIS COVERS
+   TourMate only writes to Firestore in one place: the
+   `experiences` collection (Traveler Experiences). Everything
+   else the app uses (tours, profile bio/gender/address, the
+   destination catalog) lives in localStorage or static JS, not
+   Firestore, so there is nothing else to lock down here.
+
+   RULES OF THUMB APPLIED BELOW
+   - Anyone can READ experiences — guests can browse Traveler
+     Experiences without an account (PART 3/18 of the spec).
+   - Only a real, signed-in Firebase user can CREATE one, and
+     only with their own uid attached — guests have no stable
+     uid, so they cannot post (PART 12, PART 21).
+   - Only the original author can EDIT or DELETE their own
+     experience — one narrow exception lets ANY reader bump
+     `helpfulCount` by exactly 1 and touch nothing else, which
+     is what powers the "Helpful" button without needing a
+     second collection just to track who clicked it.
+   ========================================================= */
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /experiences/{experienceId} {
+
+      allow read: if true;
+
+      allow create: if isSignedIn()
+                    && request.resource.data.userId == request.auth.uid
+                    && isValidExperience(request.resource.data);
+
+      allow update: if isOwnerUpdate() || isHelpfulIncrement();
+
+      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    // Everything else is closed by default.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwnerUpdate() {
+      return isSignedIn()
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.userId == resource.data.userId;
+    }
+
+    function isHelpfulIncrement() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['helpfulCount'])
+        && request.resource.data.helpfulCount == resource.data.helpfulCount + 1;
+    }
+
+    function isValidExperience(data) {
+      return data.title is string && data.title.size() > 0 && data.title.size() <= 120
+        && data.destinationId is string
+        && data.description is string && data.description.size() <= 4000
+        && data.tripDuration is number && data.tripDuration >= 0 && data.tripDuration <= 60
+        && data.approxCost is number && data.approxCost >= 0
+        && data.rating is number && data.rating >= 0 && data.rating <= 5
+        && data.placesVisited is list && data.placesVisited.size() <= 15
+        && data.tips is list && data.tips.size() <= 15
+        && data.photos is list && data.photos.size() <= 5
+        && data.helpfulCount == 0;
+    }
+  }
+}

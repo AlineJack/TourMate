@@ -10,6 +10,8 @@
 
 (function () {
 
+  initThemeToggle();
+
   const card = document.querySelector(".auth-card");
 
   if (card) {

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<script>
+  (function () {
+    var theme = localStorage.getItem("tourmate_theme") === "dark" ? "dark" : "light";
+    document.documentElement.setAttribute("data-theme", theme);
+  })();
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Share your experience — TourMate</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%2314313A'/%3E%3Cpath d='M15.5 8.5L13 13L8.5 15.5L11 11L15.5 8.5Z' fill='%23EFA23D'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&amp;family=Inter:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<header class="navbar">
+  <div class="container">
+    <a href="dashboard.html" class="brand">
+      <svg viewBox="0 0 24 24" class="brand-mark" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="12" r="10.2" fill="none" stroke="#14313A" stroke-width="1.6"/>
+        <path d="M15.5 8.5L13 13L8.5 15.5L11 11L15.5 8.5Z" fill="#EFA23D"/>
+      </svg>
+      TourMate
+    </a>
+    <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="nav-links">
+      <a href="dashboard.html" data-page="dashboard">Dashboard</a>
+      <a href="explore.html" data-page="explore">Explore</a>
+      <a href="planner.html" data-page="planner">Tour Planner</a>
+      <a href="experiences.html" data-page="experiences">Experiences</a>
+      <a href="checklist.html" data-page="checklist">Checklist</a>
+      <a href="profile.html" data-page="profile">Profile</a>
+    </nav>
+    <div class="nav-right">
+      <button class="theme-toggle-btn" data-theme-toggle type="button" aria-label="Toggle dark mode">🌙</button>
+      <span class="nav-user" data-nav-user></span>
+      <button class="btn btn-ghost btn-sm" data-logout type="button">Log out</button>
+    </div>
+  </div>
+</header>
+
+<main class="page-main">
+  <div class="container container-narrow">
+
+    <div id="guestNotice" style="display:none;" class="empty-state">
+      <h3>Create a free account to share your trip</h3>
+      <p>Traveler Experiences are tied to a real account so other travelers know it's genuine — browsing stays open to everyone, but posting needs a quick sign-up.</p>
+      <a href="login.html?tab=register" class="btn btn-primary">Create an account</a>
+    </div>
+
+    <form id="experienceForm" style="display:none;">
+      <div class="welcome-row">
+        <div>
+          <span class="experience-badge">Traveler Experience</span>
+          <h1>Share your experience</h1>
+          <p>Tell other travelers how your trip actually went — cost, places, and honest tips.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><h3>The basics</h3></div>
+        <div class="field-row">
+          <div class="field">
+            <label for="expDestination">Destination</label>
+            <input type="text" id="expDestination" class="field-input" list="destinationSuggestions" maxlength="80" placeholder="e.g. Sajek, Tanguar Haor, a small village..." required />
+            <datalist id="destinationSuggestions"></datalist>
+          </div>
+          <div class="field">
+            <label for="expTitle">Title</label>
+            <input type="text" id="expTitle" class="field-input" maxlength="120" placeholder="e.g. A rainy 3 days in Sajek" required />
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="expDuration">Trip duration (days)</label>
+            <input type="number" id="expDuration" class="field-input" min="1" max="60" required />
+          </div>
+          <div class="field">
+            <label for="expCost">Approx. cost per person (৳)</label>
+            <input type="number" id="expCost" class="field-input" min="0" required />
+          </div>
+        </div>
+        <div class="field">
+          <label>Your rating</label>
+          <div class="star-picker" id="ratingPicker"></div>
+        </div>
+        <div class="field">
+          <label for="expDescription">Your story</label>
+          <textarea id="expDescription" class="field-input" rows="6" maxlength="4000" placeholder="What was the trip actually like?" required></textarea>
+        </div>
+        <p class="field-error" id="expFormError"></p>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><h3>Places visited</h3></div>
+        <div class="inline-add-row">
+          <input type="text" id="placeInput" class="field-input" placeholder="e.g. Konglak Para" />
+          <button type="button" class="btn btn-outline" id="addPlaceBtn">Add</button>
+        </div>
+        <ul class="chip-list" id="placesList"></ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><h3>Tips &amp; recommendations</h3></div>
+        <p class="card-hint">Personal advice — not verified facts. e.g. "Leave early", "Carry cash".</p>
+        <div class="inline-add-row">
+          <input type="text" id="tipInput" class="field-input" placeholder="e.g. Bring warm clothes for the evening" />
+          <button type="button" class="btn btn-outline" id="addTipBtn">Add</button>
+        </div>
+        <ul class="chip-list" id="tipsList"></ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <h3>Day-by-day (optional)</h3>
+          <button type="button" class="btn btn-outline btn-sm" id="addDayBtn">+ Add a day</button>
+        </div>
+        <div id="daysList"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><h3>Photos (optional)</h3></div>
+        <p class="card-hint">Up to 5 photos. Resized and compressed in your browser before upload — no photos needed to publish.</p>
+        <input type="file" id="photoInput" accept="image/*" multiple />
+        <div class="photo-preview-row" id="photoPreviewRow"></div>
+        <p class="field-error" id="photoError"></p>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" id="submitExpBtn">Publish experience</button>
+      </div>
+    </form>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="container">TourMate</div>
+</footer>
+
+<!-- Firebase SDK (compat build — works with plain <script> tags, no bundler needed) -->
+<script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-auth-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+
+<script src="js/storage.js"></script>
+<script src="js/tour-store.js"></script>
+<script src="js/experience-store.js"></script>
+<script src="js/profile-store.js"></script>
+<script src="js/settings-store.js"></script>
+<script src="js/roles.js"></script>
+<script src="js/app.js"></script>
+<script src="js/destinations.js"></script>
+<script src="js/experience-form.js"></script>
+</body>
+</html>

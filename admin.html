@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<script>
+  (function () {
+    var theme = localStorage.getItem("tourmate_theme") === "dark" ? "dark" : "light";
+    document.documentElement.setAttribute("data-theme", theme);
+  })();
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin (Prototype) — TourMate</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%2314313A'/%3E%3Cpath d='M15.5 8.5L13 13L8.5 15.5L11 11L15.5 8.5Z' fill='%23EFA23D'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&amp;family=Inter:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<header class="navbar">
+  <div class="container">
+    <a href="dashboard.html" class="brand">
+      <svg viewBox="0 0 24 24" class="brand-mark" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="12" r="10.2" fill="none" stroke="#14313A" stroke-width="1.6"/>
+        <path d="M15.5 8.5L13 13L8.5 15.5L11 11L15.5 8.5Z" fill="#EFA23D"/>
+      </svg>
+      TourMate
+    </a>
+    <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="nav-links">
+      <a href="dashboard.html" data-page="dashboard">Dashboard</a>
+      <a href="explore.html" data-page="explore">Explore</a>
+      <a href="planner.html" data-page="planner">Tour Planner</a>
+      <a href="experiences.html" data-page="experiences">Experiences</a>
+      <a href="checklist.html" data-page="checklist">Checklist</a>
+      <a href="profile.html" data-page="profile">Profile</a>
+    </nav>
+    <div class="nav-right">
+      <button class="theme-toggle-btn" data-theme-toggle type="button" aria-label="Toggle dark mode">🌙</button>
+      <span class="nav-user" data-nav-user></span>
+      <button class="btn btn-ghost btn-sm" data-logout type="button">Log out</button>
+    </div>
+  </div>
+</header>
+
+<main class="page-main">
+  <div class="container">
+
+    <!-- Shown to any signed-in visitor who is NOT on the admin allowlist.
+         A real JS check runs in admin.js — this is never just hidden with
+         CSS, and admin data below is never rendered for this case. -->
+    <div id="adminDenied" class="card admin-denied" style="display:none;">
+      <h2>Admin access required</h2>
+      <p>This account isn't on TourMate's admin list, so there's nothing to show here. If you think this is a mistake, ask whoever manages the project to add your account's email to <code>js/roles.js</code>.</p>
+      <a href="dashboard.html" class="btn btn-primary">Back to Dashboard</a>
+    </div>
+
+    <div id="adminContent">
+      <div class="welcome-row">
+        <div>
+          <span class="guide-badge">Prototype Admin — local data only</span>
+          <h1>Admin</h1>
+          <p>
+            This is TourMate's local admin workspace — Role: <strong>Admin</strong>. The data shown
+            here is local to this browser because this phase uses localStorage for application data,
+            so it covers every account/guest session that has used TourMate on this browser.
+          </p>
+          <div class="card" style="margin-top:16px;">
+            <div class="card-title"><h2>Admin access</h2></div>
+            <p class="card-hint" id="adminAccessInfo"></p>
+            <p class="card-hint">Only verified Firebase accounts listed in <code>js/roles.js</code> should be used as TourMate administrators. Guests and ordinary users stay in the normal TourMate experience.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-row" id="adminStats"></div>
+
+      <div class="section-head">
+        <h2>Traveler Experiences</h2>
+        <p>All experiences (posts) stored on this browser, newest first — view or delete any of them.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">
+          <h3>Manage experiences</h3>
+          <button class="btn btn-outline btn-sm" id="clearSampleBtn" type="button">Clear sample data</button>
+        </div>
+        <ul class="admin-list" id="adminExperienceList"></ul>
+      </div>
+
+      <div class="section-head">
+        <h2>Tours</h2>
+        <p>Every trip saved locally, across every account/guest session on this browser — view or delete any of them.</p>
+      </div>
+      <div class="card">
+        <ul class="admin-list" id="adminTourList"></ul>
+      </div>
+
+      <div class="section-head">
+        <h2>Destination catalog</h2>
+        <p>Read-only for now — this is TourMate's code-defined dataset (js/destinations.js), shared by Explore, the Guide, and destination pages.</p>
+      </div>
+      <div class="card">
+        <ul class="admin-list" id="adminDestinationList"></ul>
+      </div>
+
+      <div class="section-head">
+        <h2>System Information</h2>
+        <p>What this deployment is actually running on — not a claim of server-side security.</p>
+      </div>
+      <div class="card">
+        <ul class="admin-list" id="adminSystemInfo"></ul>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="container">TourMate</div>
+</footer>
+
+<!-- Firebase SDK (compat build — works with plain <script> tags, no bundler needed) -->
+<script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-auth-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+
+<script src="js/storage.js"></script>
+<script src="js/tour-store.js"></script>
+<script src="js/experience-store.js"></script>
+<script src="js/profile-store.js"></script>
+<script src="js/settings-store.js"></script>
+<script src="js/roles.js"></script>
+<script src="js/app.js"></script>
+<script src="js/destinations.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>

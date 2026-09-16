@@ -1,11 +1,11 @@
 /* =========================================================
    profile.js — logic for profile.html only
 
-   View mode shows name, email, bio, gender, home address and
-   saved-plan count. Edit mode is a form that writes:
-     - name              -> Firebase Auth displayName (skipped for guests)
-     - bio/gender/address -> loadProfileExtra()/saveProfileExtra() in
-                              storage.js (localStorage, same as tour data)
+   Everything here — name, bio, gender, home address — now
+   saves through profile-store.js straight to localStorage.
+   Saving no longer calls auth.currentUser.updateProfile(), so
+   it can't hang or fail because Firebase is unreachable; only
+   the account's email/login stays with Firebase Auth.
    ========================================================= */
 
 (function () {
@@ -18,26 +18,6 @@
     "female": "Female",
     "male":   "Male",
   };
-
-  /** Rejects with `message` if `promise` hasn't settled within `ms`, so a save can never hang forever. */
-  function withTimeout(promise, ms, message) {
-    return new Promise(function (resolve, reject) {
-      const timer = setTimeout(function () {
-        reject(new Error(message));
-      }, ms);
-
-      promise.then(
-        function (value) {
-          clearTimeout(timer);
-          resolve(value);
-        },
-        function (err) {
-          clearTimeout(timer);
-          reject(err);
-        }
-      );
-    });
-  }
 
   function renderAvatarAndName(name) {
     const initials = session.isGuest
@@ -53,11 +33,10 @@
     qs("#profileName").textContent = name;
   }
 
-  function renderDetails(extra) {
-    const data = extra || {};
-    qs("#profileBioView").textContent = data.bio ? data.bio : "Not set";
-    qs("#profileGenderView").textContent = data.gender ? (GENDER_LABELS[data.gender] || data.gender) : "Not set";
-    qs("#profileAddressView").textContent = data.homeAddress ? data.homeAddress : "Not set";
+  function renderDetails(profile) {
+    qs("#profileBioView").textContent = profile.bio ? profile.bio : "Not set";
+    qs("#profileGenderView").textContent = profile.gender ? (GENDER_LABELS[profile.gender] || profile.gender) : "Not set";
+    qs("#profileAddressView").textContent = profile.homeAddress ? profile.homeAddress : "Not set";
   }
 
   /* ---------- initial render ---------- */
@@ -73,12 +52,8 @@
     qs("#createAccountBtn").style.display = "inline-flex";
   }
 
-  let currentExtra = {};
-
-  loadProfileExtra(session).then(function (extra) {
-    currentExtra = extra || {};
-    renderDetails(currentExtra);
-  });
+  let currentProfile = getProfile(session);
+  renderDetails(currentProfile);
 
   /* ---------- logout ---------- */
 
@@ -113,9 +88,9 @@
   function enterEditMode() {
     qs("#profileNameInput").value = session.isGuest ? "" : session.name;
     qs("#profileNameInput").disabled = session.isGuest;
-    qs("#profileBioInput").value = currentExtra.bio || "";
-    qs("#profileGenderInput").value = currentExtra.gender || "";
-    qs("#profileAddressInput").value = currentExtra.homeAddress || "";
+    qs("#profileBioInput").value = currentProfile.bio || "";
+    qs("#profileGenderInput").value = currentProfile.gender || "";
+    qs("#profileAddressInput").value = currentProfile.homeAddress || "";
 
     setFieldError("profileNameError", "");
     setFieldError("profileBioError", "");
@@ -170,30 +145,16 @@
     saveBtn.disabled = true;
     saveBtn.textContent = "Saving…";
 
-    // Guests have no Firebase user to rename — only the local session
-    // snapshot is updated for them. Real accounts update Auth too, since
-    // the navbar and dashboard read displayName-derived data from it.
-    const updateName = session.isGuest || !auth.currentUser
-      ? Promise.resolve()
-      : auth.currentUser.updateProfile({ displayName: name });
-
-    const savePromise = updateName.then(function () {
-      return saveProfileExtra(session, { bio: bio, gender: gender, homeAddress: homeAddress });
-    });
-
-    // Guards against a hung network call (e.g. no connection) leaving the
-    // button stuck on "Saving…" forever.
-    withTimeout(savePromise, 12000, "That took too long — check your internet connection and try again.")
-      .then(function (savedExtra) {
-        currentExtra = savedExtra;
-
-        if (!session.isGuest) {
-          session.name = name;
-          updateSessionFields({ name: name });
-        }
+    // Purely local now — no Firebase call, so this can't hang waiting on
+    // a network response. Guests keep their local-only display name;
+    // real accounts get their cached session name refreshed too (see
+    // profile-store.js's saveProfile), so the navbar updates immediately.
+    saveProfile(session, { name: session.isGuest ? session.name : name, bio: bio, gender: gender, homeAddress: homeAddress })
+      .then(function (savedProfile) {
+        currentProfile = savedProfile;
 
         renderAvatarAndName(session.name);
-        renderDetails(currentExtra);
+        renderDetails(currentProfile);
 
         saveBtn.disabled = false;
         saveBtn.textContent = "Save changes";

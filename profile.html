@@ -2,6 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
+<script>
+  (function () {
+    var theme = localStorage.getItem("tourmate_theme") === "dark" ? "dark" : "light";
+    document.documentElement.setAttribute("data-theme", theme);
+  })();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Profile — TourMate</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%2314313A'/%3E%3Cpath d='M15.5 8.5L13 13L8.5 15.5L11 11L15.5 8.5Z' fill='%23EFA23D'/%3E%3C/svg%3E" />
@@ -26,10 +32,14 @@
     </button>
     <nav class="nav-links">
       <a href="dashboard.html" data-page="dashboard">Dashboard</a>
+      <a href="explore.html" data-page="explore">Explore</a>
       <a href="planner.html" data-page="planner">Tour Planner</a>
+      <a href="experiences.html" data-page="experiences">Experiences</a>
+      <a href="checklist.html" data-page="checklist">Checklist</a>
       <a href="profile.html" data-page="profile">Profile</a>
     </nav>
     <div class="nav-right">
+      <button class="theme-toggle-btn" data-theme-toggle type="button" aria-label="Toggle dark mode">🌙</button>
       <span class="nav-user" data-nav-user></span>
       <button class="btn btn-ghost btn-sm" data-logout type="button">Log out</button>
     </div>
@@ -123,12 +133,16 @@
 <!-- Firebase SDK (compat build — works with plain <script> tags, no bundler needed) -->
 <script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-storage-compat.js"></script>
 <script src="js/firebase-config.js"></script>
 
 <script src="js/storage.js"></script>
+<script src="js/tour-store.js"></script>
+<script src="js/experience-store.js"></script>
+<script src="js/profile-store.js"></script>
+<script src="js/settings-store.js"></script>
+<script src="js/roles.js"></script>
 <script src="js/app.js"></script>
+<script src="js/destinations.js"></script>
 <script src="js/profile.js"></script>
 </body>
 </html>
