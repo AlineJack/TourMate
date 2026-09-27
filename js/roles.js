@@ -27,7 +27,7 @@ const ADMIN_UIDS = [
 ];
 
 const ADMIN_EMAILS = [
-  // "your-email@example.com"
+  // "alinjack151@gmail.com"
 ];
 
 function isAdminSession(session) {
