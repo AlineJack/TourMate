@@ -1,6 +1,6 @@
 # TourMate
 
-A tour-planning and travel-discovery web app built for a university ISD project, using only **HTML, CSS, and JavaScript** (no framework, no backend server).
+A tour-planning and travel-discovery web app, using only **HTML, CSS, and JavaScript**.
 
 ## Current phase: local-storage-first
 
@@ -31,7 +31,7 @@ TourMate is being built in two phases:
 
 ## How to run it
 
-Because the weather, map, and font features fetch data over the internet, an internet connection is needed for those specific extras — the rest of the app (tours, experiences, checklist, profile, theme, admin) works fully offline once the page has loaded. Two ways to run it:
+Because the weather, map and font features fetch data over the internet, an internet connection is needed for those specific extras — the rest of the app (tours, experiences, checklist, profile, theme, admin) works fully offline once the page has loaded. Two ways to run it:
 
 1. **Simplest:** double-click `index.html` to open it in your browser.
 2. **More reliable (recommended):** serve the folder with any static server, for example:
